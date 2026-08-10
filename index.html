@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Open Dicey Combos</title>
+    <script>
+        function openDiceyCombos() {
+            var ua = navigator.userAgent || navigator.vendor || window.opera;
+            var isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+            var isAndroid = /android/i.test(ua);
+
+            // Custom scheme or universal link if known; fallback to store
+            if (isIOS) {
+                window.location.href = "https://apps.apple.com/us/app/dicey-combos-yatzy-scorecard/id6742786864";
+            } else if (isAndroid) {
+                window.location.href = "
