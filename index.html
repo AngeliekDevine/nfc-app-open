@@ -1,108 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Opening Dicey Combos…</title>
-<style>
-  body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: #111827;
-    color: #f9fafb;
-    text-align: center;
-    padding: 24px;
-    box-sizing: border-box;
-  }
-  .card { max-width: 340px; }
-  .dice {
-    font-size: 48px;
-    margin-bottom: 12px;
-    animation: spin 1.2s linear infinite;
-  }
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  h1 { font-size: 18px; font-weight: 600; margin: 0 0 8px; }
-  p { font-size: 14px; color: #9ca3af; margin: 0 0 20px; }
-  a.manual {
-    display: inline-block;
-    padding: 10px 20px;
-    background: #2563eb;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-  }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#171717">
+  <meta name="description" content="A simple offline Yahtzyy scorecard and dice roller.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>Yahtzyy Scorecard</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="card">
-    <div class="dice">🎲</div>
-    <h1>Opening Dicey Combos…</h1>
-    <p>If nothing happens, you'll be sent to the app store automatically. Or tap below.</p>
-    <a class="manual" id="manualLink" href="https://www.diceycombos.com/en">Continue</a>
-  </div>
+<header class="appbar">
+  <div><h1>Yahtzyy</h1><span id="roundLabel">Round 1 of 13</span></div>
+  <button id="newGameBtn" class="secondary">New Game</button>
+</header>
 
-  <script>
-    // ---- CONFIGURE THESE ----
-    // Best-guess custom URL scheme for the app. Update this if you find/confirm
-    // the real one (e.g. via the developer, or a deep-link tester tool).
-    var CUSTOM_SCHEME = "instagram://";
+<main>
+  <section class="card dice-card">
+    <div class="section-head"><h2>Dice</h2><span id="rollLabel">Roll 0 / 3</span></div>
+    <div id="dice" class="dice-row" aria-label="Dice"></div>
+    <div class="dice-actions">
+      <button id="rollBtn" class="primary">Roll Dice</button>
+      <button id="clearHoldsBtn" class="secondary">Unhold All</button>
+    </div>
+    <p class="hint">Tap a die to hold it between rolls.</p>
+  </section>
 
-    var IOS_STORE_URL = "https://apps.apple.com/us/app/dicey-combos/id6742786864";
-    var ANDROID_STORE_URL = "https://play.google.com/store/apps/details?id=com.sandermenke.diceycombos";
-    var FALLBACK_URL = "https://www.diceycombos.com/en"; // desktop / unknown devices
+  <section class="card">
+    <div class="section-head"><h2>Players</h2><button id="addPlayerBtn" class="secondary">Add Player</button></div>
+    <div id="players" class="players"></div>
+  </section>
 
-    var FALLBACK_DELAY_MS = 1200;
-    // --------------------------
+  <section class="card scorecard">
+    <div class="section-head"><h2>Scorecard</h2><span class="hint">Tap a blank cell to score</span></div>
+    <div id="scoreTableWrap"></div>
+  </section>
+</main>
 
-    function getPlatform() {
-      var ua = navigator.userAgent || navigator.vendor || window.opera;
-      if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) return "ios";
-      if (/android/i.test(ua)) return "android";
-      return "other";
-    }
-
-    var platform = getPlatform();
-    var storeUrl = platform === "ios" ? IOS_STORE_URL
-                 : platform === "android" ? ANDROID_STORE_URL
-                 : FALLBACK_URL;
-
-    // Point the manual "Continue" button at the right destination immediately.
-    document.getElementById("manualLink").href = storeUrl;
-
-    // Only attempt the app-open + auto-fallback dance on mobile.
-    if (platform === "ios" || platform === "android") {
-
-      // Track whether the page loses focus (a strong signal the app opened).
-      var didHide = false;
-      document.addEventListener("visibilitychange", function () {
-        if (document.hidden) didHide = true;
-      });
-
-      // Try to open the app via custom scheme.
-      window.location.href = CUSTOM_SCHEME;
-
-      // After a short delay, if we're still here (app didn't open), go to the store.
-      setTimeout(function () {
-        if (!didHide) {
-          window.location.href = storeUrl;
-        }
-      }, FALLBACK_DELAY_MS);
-
-    } else {
-      // Desktop / unknown device: just send them to the website.
-      setTimeout(function () {
-        window.location.href = FALLBACK_URL;
-      }, FALLBACK_DELAY_MS);
-    }
-  </script>
+<div id="toast" class="toast" role="status"></div>
+<script src="app.js"></script>
 </body>
 </html>
