@@ -1,10 +1,11 @@
 const CATEGORIES = [
   ["ones","Ones"],["twos","Twos"],["threes","Threes"],["fours","Fours"],["fives","Fives"],["sixes","Sixes"],
   ["threeKind","Three of a Kind"],["fourKind","Four of a Kind"],["fullHouse","Full House"],
-  ["smallStraight","Small Straight"],["largeStraight","Large Straight"],["Yahtzyy","Yahtzyy"],["chance","Chance"]
+  ["smallStraight","Small Straight"],["largeStraight","Large Straight"],["yahtzee","Yahtzee"],["chance","Chance"]
 ];
-const KEY="Yahtzyy-pwa-v1";
-let state=load()||{players:[newPlayer("Player 1")],active:0,round:0,dice:[1,1,1,1,1],held:[false,false,false,false,false],rolls:0};
+const KEY="yahtzee-pwa-v1";
+let state=load()||{players:[newPlayer("Player 1")],active:0,round:0,dice:[1,1,1,1,1],held:[false,false,false,false,false],rolls:0,handDice:false,manualScores:false};
+if(state.handDice===undefined)state.handDice=false;if(state.manualScores===undefined)state.manualScores=false;
 
 function newPlayer(name){return {name,scores:{}}}
 function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch{return null}}
@@ -26,17 +27,32 @@ function potential(key){
  if(key==="fullHouse")return vals.includes(3)&&vals.includes(2)?25:0;
  if(key==="smallStraight")return hasStraight(4)?30:0;
  if(key==="largeStraight")return hasStraight(5)?40:0;
- if(key==="Yahtzyy")return vals.includes(5)?50:0;
+ if(key==="yahtzee")return vals.includes(5)?50:0;
  if(key==="chance")return s;
 }
 function upper(p){return ["ones","twos","threes","fours","fives","sixes"].reduce((a,k)=>a+(p.scores[k]??0),0)}
 function total(p){return Object.values(p.scores).reduce((a,b)=>a+b,0)+(upper(p)>=63?35:0)}
 function renderDice(){
  const el=document.querySelector("#dice");el.innerHTML="";
- state.dice.forEach((n,i)=>{let b=document.createElement("button");b.className="die"+(state.held[i]?" held":"");b.textContent=n;b.title=state.held[i]?"Held":"Tap to hold";b.onclick=()=>{if(state.rolls){state.held[i]=!state.held[i];save();renderDice()}};el.appendChild(b)});
- document.querySelector("#rollLabel").textContent=`Roll ${state.rolls} / 3`;
- document.querySelector("#rollBtn").disabled=state.rolls>=3||state.round>=13;
- document.querySelector("#clearHoldsBtn").disabled=!state.held.some(Boolean);
+ state.dice.forEach((n,i)=>{
+   let b=document.createElement("button");
+   b.className="die"+(state.held[i]?" held":"")+(state.handDice?" editable":"");
+   b.textContent=n;
+   b.title=state.handDice?"Tap to change value":(state.held[i]?"Held":"Tap to hold");
+   b.onclick=()=>{
+     if(state.handDice){
+       state.dice[i]=state.dice[i]>=6?1:state.dice[i]+1;
+       state.rolls=Math.max(state.rolls,1);
+       save();renderDice();renderScore();
+     } else if(state.rolls){state.held[i]=!state.held[i];save();renderDice()}
+   };
+   el.appendChild(b)
+ });
+ document.querySelector("#rollLabel").textContent=state.handDice?"Manual Dice":`Roll ${state.rolls} / 3`;
+ document.querySelector("#rollBtn").disabled=state.handDice||state.rolls>=3||state.round>=13;
+ document.querySelector("#clearHoldsBtn").disabled=state.handDice||!state.held.some(Boolean);
+ document.querySelector("#handDiceBtn").textContent=state.handDice?"Use Dice Roller":"Use Hand Dice";
+ document.querySelector("#scoreHint").textContent=state.manualScores?"Manual edit mode: enter any score":"Tap a blank cell to score";
 }
 function renderPlayers(){
  const el=document.querySelector("#players");el.innerHTML="";
@@ -58,8 +74,24 @@ function renderScore(){
  for(const [k,n] of CATEGORIES.slice(6))h+=row(k,n);
  h+=`<tr class="total"><td>Grand Total</td>${state.players.map(p=>`<td>${total(p)}</td>`).join("")}</tr></tbody>`;
  t.innerHTML=h;wrap.innerHTML="";let s=document.createElement("div");s.className="score-wrap";s.appendChild(t);wrap.appendChild(s);
- function row(k,n){return `<tr><td class="category">${n}</td>`+state.players.map((p,i)=>{let v=p.scores[k];if(v!==undefined)return `<td class="score-cell scored">${v}</td>`;let disabled=i!==state.active||state.rolls===0||state.round>=13;return `<td class="score-cell ${disabled?"":"available"}" data-key="${k}" data-player="${i}">${disabled?"—":potential(k)}</td>`}).join("")+"</tr>"}
+ function row(k,n){
+   return `<tr><td class="category">${n}</td>`+state.players.map((p,i)=>{
+     let v=p.scores[k];
+     if(state.manualScores){return `<td class="score-cell manual-cell"><input class="score-input" type="number" min="0" step="1" value="${v??""}" placeholder="—" data-key="${k}" data-player="${i}" aria-label="${escapeHtml(p.name)} ${n} score"></td>`}
+     if(v!==undefined)return `<td class="score-cell scored">${v}</td>`;
+     let disabled=i!==state.active||state.rolls===0||state.round>=13;
+     return `<td class="score-cell ${disabled?"":"available"}" data-key="${k}" data-player="${i}">${disabled?"—":potential(k)}</td>`
+   }).join("")+"</tr>"
+ }
  t.querySelectorAll(".available").forEach(c=>c.onclick=()=>score(c.dataset.player,c.dataset.key));
+ t.querySelectorAll(".score-input").forEach(input=>{
+   input.onchange=()=>{
+     const pi=+input.dataset.player,key=input.dataset.key,raw=input.value.trim();
+     if(raw===""){delete state.players[pi].scores[key]}else state.players[pi].scores[key]=Math.max(0,Math.floor(Number(raw)||0));
+     save();renderScore();renderPlayers();
+   };
+   input.onkeydown=e=>{if(e.key==="Enter")input.blur()}
+ });
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function score(pi,key){
@@ -74,11 +106,18 @@ function roll(){
  state.dice=state.dice.map((v,i)=>state.held[i]?v:Math.floor(Math.random()*6)+1);
  state.rolls++;save();renderAll();
 }
-function reset(){if(confirm("Start a new game? Current scores will be erased.")){state={players:state.players.map((p,i)=>newPlayer(p.name||`Player ${i+1}`)),active:0,round:0,dice:[1,1,1,1,1],held:[false,false,false,false,false],rolls:0};save();renderAll()}}
+function reset(){if(confirm("Start a new game? Current scores will be erased.")){state={players:state.players.map((p,i)=>newPlayer(p.name||`Player ${i+1}`)),active:0,round:0,dice:[1,1,1,1,1],held:[false,false,false,false,false],rolls:0,handDice:false,manualScores:false};save();renderAll()}}
 document.querySelector("#rollBtn").onclick=roll;
 document.querySelector("#clearHoldsBtn").onclick=()=>{state.held.fill(false);save();renderDice()};
 document.querySelector("#addPlayerBtn").onclick=()=>{state.players.push(newPlayer(`Player ${state.players.length+1}`));save();renderAll()};
 document.querySelector("#newGameBtn").onclick=reset;
+document.querySelector("#handDiceBtn").onclick=()=>{
+ state.handDice=!state.handDice;state.held.fill(false);if(state.handDice)state.rolls=1;save();renderAll();toast(state.handDice?"Hand dice enabled — tap a die to cycle 1–6":"Dice roller enabled");
+};
+document.querySelector("#manualScoreBtn").onclick=()=>{
+ state.manualScores=!state.manualScores;save();renderAll();toast(state.manualScores?"Manual score editing enabled":"Automatic scoring enabled");
+};
+
 function renderAll(){renderDice();renderPlayers();renderScore();document.querySelector("#roundLabel").textContent=state.round>=13?"Game Complete":`Round ${Math.min(state.round+1,13)} of 13`}
 renderAll();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});

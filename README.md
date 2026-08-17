@@ -1,16 +1,18 @@
-# Yahtzyy Scorecard PWA
+# Yahtzee Scorecard PWA
 
-A dependency-free, offline-capable Yahtzyy scorecard Progressive Web App.
+A dependency-free, offline-capable Yahtzee scorecard Progressive Web App.
 
 ## Features
 - Unlimited players
 - Built-in dice roller
 - Hold/unhold dice between rolls
 - Three rolls per turn
-- Standard 13 Yahtzyy categories
+- Standard 13 Yahtzee categories
 - Automatic upper-section bonus at 63+
-- Yahtzyy scoring and all standard lower-section scoring
+- Yahtzee scoring and all standard lower-section scoring
 - LocalStorage persistence
+- Manual scorecard editing for games using physical dice
+- Manual dice mode: tap each die to cycle through values 1–6
 - Installable/offline PWA
 - No macros, frameworks, backend, or external dependencies
 
