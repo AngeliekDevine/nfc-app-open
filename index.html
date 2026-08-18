@@ -1,45 +1,8 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#171717">
-  <meta name="description" content="A simple offline Yahtzee scorecard and dice roller.">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <title>Yahtzee Scorecard</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-<header class="appbar">
-  <div><h1>Yahtzee</h1><span id="roundLabel">Round 1 of 13</span></div>
-  <button id="newGameBtn" class="secondary">New Game</button>
-</header>
-
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#c9232d"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="stylesheet" href="styles.css"><title>yahtzyy Scorecard</title></head><body>
+<header class="appbar"><div><h1>yahtzyy</h1><span id="roundLabel">Choose a dice mode</span></div><button id="newGameBtn" class="secondary">New Game</button></header>
 <main>
-  <section class="card dice-card">
-    <div class="section-head"><h2>Dice</h2><span id="rollLabel">Roll 0 / 3</span></div>
-    <div id="dice" class="dice-row" aria-label="Dice"></div>
-    <div class="dice-actions">
-      <button id="rollBtn" class="primary">Roll Dice</button>
-      <button id="clearHoldsBtn" class="secondary">Unhold All</button>
-      <button id="handDiceBtn" class="secondary">Use Hand Dice</button>
-    </div>
-    <p class="hint">Tap a die to hold it between rolls.</p>
-  </section>
-
-  <section class="card">
-    <div class="section-head"><h2>Players</h2><button id="addPlayerBtn" class="secondary">Add Player</button></div>
-    <div id="players" class="players"></div>
-  </section>
-
-  <section class="card scorecard">
-    <div class="section-head"><h2>Scorecard</h2><div class="score-tools"><button id="manualScoreBtn" class="secondary">Edit Scores</button><span id="scoreHint" class="hint">Tap a blank cell to score</span></div></div>
-    <div id="scoreTableWrap"></div>
-  </section>
-</main>
-
-<div id="toast" class="toast" role="status"></div>
-<script src="app.js"></script>
-</body>
-</html>
+<section id="modeCard" class="card mode-card"><div class="section-head"><h2>Choose Dice Mode</h2></div><div class="mode-options"><button id="virtualModeBtn" class="mode-option"><span class="mode-icon">🎲</span><strong>Virtual Dice</strong><small>Roll and hold dice in the app.</small></button><button id="physicalModeBtn" class="mode-option"><span class="mode-icon">✋</span><strong>Physical Dice</strong><small>Use your own dice and enter scores manually.</small></button></div></section>
+<section id="diceCard" class="card hidden"><div class="section-head"><h2 id="diceTitle"></h2><span id="rollLabel"></span></div><div id="dice" class="dice-row"></div><div class="dice-actions"><button id="rollBtn" class="primary">Roll Dice</button><button id="clearHoldsBtn" class="secondary">Unhold All</button><button id="changeModeBtn" class="secondary">Change Dice Mode</button></div><p id="diceHint" class="hint"></p></section>
+<section class="card"><div class="section-head"><h2>Players</h2><button id="addPlayerBtn" class="secondary">Add Player</button></div><div id="players" class="players"></div></section>
+<section class="card scorecard"><div class="section-head"><h2>Scorecard</h2><div class="score-tools"><button id="manualScoreBtn" class="secondary">Edit Scores</button><span id="scoreHint" class="hint">Automatic scoring</span></div></div><div id="scoreTableWrap"></div></section>
+</main><div id="toast" class="toast"></div><script src="app.js"></script></body></html>

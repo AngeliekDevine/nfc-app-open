@@ -1,10 +1,1 @@
-{
-  "name":"Yahtzee Scorecard",
-  "short_name":"Yahtzee",
-  "start_url":".",
-  "display":"standalone",
-  "background_color":"#0f1012",
-  "theme_color":"#171717",
-  "description":"Offline Yahtzee scorecard and dice roller.",
-  "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
-}
+{"name":"yahtzyy Scorecard","short_name":"yahtzyy","start_url":".","display":"standalone","background_color":"#f4ead0","theme_color":"#c9232d","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml"}]}
